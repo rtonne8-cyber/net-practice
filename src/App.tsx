@@ -267,6 +267,7 @@ export default function App() {
   const [mins, setMins] = useState(20);
   const [dealt, setDealt] = useState<Challenge | null>(null);
   const [session, setSession] = useState<SessionCard[]>([]);
+  const [showAllDrills, setShowAllDrills] = useState(false);
   const [rolling, setRolling] = useState(false);
   const [rollFace, setRollFace] = useState("Strike");
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -566,6 +567,9 @@ export default function App() {
         <button style={sx.sessionBtn} onClick={buildSession}>
           Build a {mins}-min session
         </button>
+        <button style={sx.libraryBtn} onClick={() => setShowAllDrills(true)}>
+          All drills · {CHALLENGES.length}
+        </button>
       </div>
 
       {dealPool.length === 0 && !session.length && (
@@ -639,6 +643,45 @@ export default function App() {
             pushBest={pushBest}
           />
         )
+      )}
+
+      {/* all-drills overlay */}
+      {showAllDrills && (
+        <div style={sx.overlay}>
+          <div style={sx.overlayHead}>
+            <button style={sx.backBtn} onClick={() => setShowAllDrills(false)}>
+              ← Back
+            </button>
+            <div>
+              <div style={sx.miniLabel}>Library</div>
+              <div style={sx.bigNum}>{CHALLENGES.length} drills</div>
+            </div>
+          </div>
+          {Object.keys(CAT).map((cat) => {
+            const drills = CHALLENGES.filter((c) => c.cat === cat);
+            if (!drills.length) return null;
+            return (
+              <div key={cat} style={sx.catSection}>
+                <div style={{ ...sx.catSectionLabel, color: CAT[cat] }}>{cat}</div>
+                {drills.map((c) => (
+                  <div key={c.id} style={sx.drillRow}>
+                    <div style={sx.drillRowTop}>
+                      <span style={sx.drillName}>{c.name}</span>
+                      <span style={sx.modeTag}>{c.mode}</span>
+                    </div>
+                    {c.kit.length > 0 && (
+                      <div style={{ ...sx.kitRow, marginTop: 6, marginBottom: 0 }}>
+                        {c.kit.map((k) => (
+                          <span key={k} style={sx.kitChip}>{KIT_LABEL[k]}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {/* records footer */}
@@ -893,5 +936,80 @@ const sx: Record<string, React.CSSProperties> = {
     borderRadius: 8,
     padding: "8px 14px",
     fontSize: 12.5,
+  },
+
+  libraryBtn: {
+    flex: "0 0 auto",
+    background: "transparent",
+    color: C.mute,
+    border: `1px solid ${C.line2}`,
+    borderRadius: 12,
+    padding: "12px 18px",
+    fontSize: 13,
+    fontWeight: 600,
+    alignSelf: "stretch",
+  },
+
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 50,
+    background: C.bg,
+    overflowY: "auto",
+    padding: "22px 20px 40px",
+  },
+
+  overlayHead: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 20,
+    paddingBottom: 18,
+    borderBottom: `1px solid ${C.line}`,
+    marginBottom: 8,
+  },
+
+  backBtn: {
+    background: "transparent",
+    color: C.mute,
+    border: `1px solid ${C.line2}`,
+    borderRadius: 8,
+    padding: "8px 14px",
+    fontSize: 13,
+    fontWeight: 600,
+    flexShrink: 0,
+    marginTop: 4,
+  },
+
+  catSection: {
+    marginTop: 20,
+  },
+
+  catSectionLabel: {
+    fontSize: 10.5,
+    fontWeight: 700,
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
+    marginBottom: 8,
+  },
+
+  drillRow: {
+    background: C.surface,
+    border: `1px solid ${C.line}`,
+    borderRadius: 10,
+    padding: "12px 14px",
+    marginBottom: 6,
+  },
+
+  drillRowTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  drillName: {
+    fontSize: 15,
+    fontWeight: 700,
+    color: C.text,
   },
 };
